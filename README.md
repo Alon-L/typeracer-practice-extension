@@ -1,7 +1,7 @@
 # TypeRacer Practice Extension
 
 A minimal extension to track the number of saves left for practice races on TypeRacer.
-![Display statistics screenshot]()
+![Display statistics screenshot](https://raw.githubusercontent.com/DayColor/typeracer-practice-extension/master/assets/screenshots/DisplayStatistics.png)
 
 # How to install?
 
