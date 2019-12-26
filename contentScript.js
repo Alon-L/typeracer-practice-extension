@@ -10,15 +10,17 @@ const createSavesLeftText = () => {
   const savesLeftDiv = document.createElement('div');
   savesLeftDiv.style = 'background-color: #fafafa; box-shadow: inset 0 0 10px rgba(0, 0, 0, .1); border-radius:  5px; padding: 1rem; margin: 1rem 0;';
 
-  savesLeftDOM = document.createElement('span');
-  savesLeftDOM.id = savesLeftId;
+  const savesLeft = document.createElement('span');
+  savesLeft.id = savesLeftId;
 
-  savesLeftDiv.appendChild(savesLeftDOM);
+  savesLeftDiv.appendChild(savesLeft);
 
   const table = document.querySelector('.themeContent .view tr:nth-child(2) td:nth-child(2)');
   if (!table) return;
 
   table.insertBefore(savesLeftDiv, table.firstChild);
+
+  savesLeftDOM = savesLeft;
 };
 
 const deleteSavesLeftText = () => {
