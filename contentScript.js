@@ -1,6 +1,33 @@
+const savesLeftId = 'savesLeft';
+
 let savesLeftDOM;
 let title;
-let btnStillExistsInterval;
+
+// Creates the saves left DOM
+const createSavesLeftText = () => {
+  if (document.getElementById(savesLeftId)) return;
+
+  const savesLeftDiv = document.createElement('div');
+  savesLeftDiv.style = 'background-color: #fafafa; box-shadow: inset 0 0 10px rgba(0, 0, 0, .1); border-radius:  5px; padding: 1rem; margin: 1rem 0;';
+
+  savesLeftDOM = document.createElement('span');
+  savesLeftDOM.id = savesLeftId;
+
+  savesLeftDiv.appendChild(savesLeftDOM);
+
+  const table = document.querySelector('.themeContent .view tr:nth-child(2) td:nth-child(2)');
+  if (!table) return;
+
+  table.insertBefore(savesLeftDiv, table.firstChild);
+};
+
+const deleteSavesLeftText = () => {
+  if (!savesLeftDOM || !document.getElementById(savesLeftId)) return;
+
+  savesLeftDOM.parentElement.remove();
+
+  savesLeftDOM = null;
+};
 
 // Convert milliseconds to human readable format
 const millisecondsToTime = (duration) => {
@@ -28,14 +55,6 @@ const millisecondsToTime = (duration) => {
   return portions.join(' ');
 };
 
-// Creates the saves left DOM
-const createSavesLeftText = () => {
-  savesLeftDOM = document.createElement('span');
-  savesLeftDOM.id = 'savesLeft';
-  savesLeftDOM.style = 'position: absolute; top: 100px; left: 100px; z-index: 10000;';
-  document.body.appendChild(savesLeftDOM);
-};
-
 // Updates the save left text to contain the number of saves left with the time left for them to reset
 const updateSavesLeftText = (savesLeft, saveTimestamp) => {
   const time = millisecondsToTime(1000 * 60 * 60 * 24 - (Date.now() - saveTimestamp));
@@ -59,7 +78,7 @@ const setSavesLeft = async (title) => {
   setInterval(() => {
     // Updates saves left text when title changes
     const titleDOM = document.querySelector('.textInfoTitle a');
-    if (!titleDOM) return title = '';
+    if (!titleDOM || !savesLeftDOM) return title = '';
     if (title !== titleDOM.innerText) {
       setSavesLeft(titleDOM.innerText);
     }
@@ -107,33 +126,58 @@ const updateStorageQuote = async (title, resQuote) => {
   return data;
 };
 
-(async () => {
-  while (true) {
-    // Looks for save button
-    clearInterval(btnStillExistsInterval);
 
-    const saveBtn = document.querySelector('table[title="Save this score in your account"] td:nth-child(2) a');
-    if (saveBtn) {
+const loopForDOMExistence = async (queries, cbBeforeClick, cbAfterClick) => {
+  let domStillExistsInterval;
+  while (true) {
+    // Looks for DOM
+    clearInterval(domStillExistsInterval);
+
+    // If multiple queries - look for the first one.
+    const domEle = document.querySelector(queries instanceof Array ? queries[0] : queries);
+    if (domEle) {
       await new Promise(async (resolve) => {
-        // Checks if save button still exists
-        btnStillExistsInterval = setInterval(() => {
-          if (!document.querySelector('table[title="Save this score in your account"] td:nth-child(2) a'))
+        // Checks if DOM still exists
+        domStillExistsInterval = setInterval(() => {
+          // If multiple queries - check if all exist.
+          if ((queries instanceof Array && queries.some(q => !document.querySelector(q))) || !document.querySelector(queries))
             return resolve();
         }, 1000);
 
-        saveBtn.addEventListener('click', async (e) => {
-          // Gets storage data for quote
-          const res = await getStorageData(title);
+        cbBeforeClick();
 
-          const resQuote = res ? res[title] : undefined;
-          const data = await updateStorageQuote(title, resQuote);
-
-          await updateSavesLeftText(calcSavesLeft(data[title].saves.length), data[title].saves[0]);
-
-          resolve();
+        domEle.addEventListener('click', async (e) => {
+          cbAfterClick(e, resolve);
         });
       });
     }
     await new Promise(resolve => setTimeout(resolve, 500));
   }
-})();
+};
+
+// Save practice race button.
+// If button exists and pressed on - add another save score to storage.
+loopForDOMExistence('table[title="Save this score in your account"] td:nth-child(2) a',
+  () => {
+    createSavesLeftText();
+  }, async (e, resolve) => {
+    // Gets storage data for quote
+    const res = await getStorageData(title);
+
+    const resQuote = res ? res[title] : undefined;
+    const data = await updateStorageQuote(title, resQuote);
+
+    await updateSavesLeftText(calcSavesLeft(data[title].saves.length), data[title].saves[0]);
+
+    resolve();
+  }
+);
+
+// Leave practice button.
+// If button exists and pressed on - remove statistics bar.
+loopForDOMExistence(['.navControls tr td:first-child a', 'table[title="Save this score in your account"] td:nth-child(2) a'],
+  () => {},
+  () => {
+    deleteSavesLeftText();
+  }
+);

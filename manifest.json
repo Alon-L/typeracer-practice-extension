@@ -1,6 +1,6 @@
 {
   "name": "TypeRacer Practice Extension",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Displays statistics of practice texts on TypeRacer.",
   "permissions": [
     "storage",
