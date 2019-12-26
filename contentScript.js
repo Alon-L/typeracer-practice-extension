@@ -75,18 +75,15 @@ const setSavesLeft = async (title) => {
   else updateSavesLeftText(calcSavesLeft(resQuote.saves.length), resQuote.saves[0]);
 };
 
-(async () => {
-  createSavesLeftText();
-  setInterval(() => {
-    // Updates saves left text when title changes
-    const titleDOM = document.querySelector('.textInfoTitle a');
-    if (!titleDOM || !savesLeftDOM) return title = '';
-    if (title !== titleDOM.innerText) {
-      setSavesLeft(titleDOM.innerText);
-    }
-    title = titleDOM.innerText;
-  }, 1000);
-})();
+setInterval(() => {
+  // Updates saves left text when title changes
+  const titleDOM = document.querySelector('.textInfoTitle a');
+  if (!titleDOM || !savesLeftDOM) return title = '';
+  if (title !== titleDOM.innerText) {
+    setSavesLeft(titleDOM.innerText);
+  }
+  title = titleDOM.innerText;
+}, 1000);
 
 const getStorageData = async (title) => {
   return await new Promise(resolve => {
