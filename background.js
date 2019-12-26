@@ -39,5 +39,5 @@ const clearExpiredScores = async () => {
   await updateStorage(res);
 };
 
-setInterval(clearExpiredScores, 1000 * 60);
+setInterval(clearExpiredScores, 1000 * 60 * 10);
 clearExpiredScores();
