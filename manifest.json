@@ -17,7 +17,7 @@
     "persistent": false
   },
   "icons": {
-    "128": "icon128.png"
+    "128": "assets/icon128.png"
   },
   "manifest_version": 2
 }
