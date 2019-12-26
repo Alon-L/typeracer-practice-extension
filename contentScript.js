@@ -1,9 +1,8 @@
-console.log('Here in typeracer');
-
 let savesLeftDOM;
 let title;
 let btnStillExistsInterval;
 
+// Convert milliseconds to human readable format
 const millisecondsToTime = (duration) => {
   const portions = [];
 
@@ -29,6 +28,7 @@ const millisecondsToTime = (duration) => {
   return portions.join(' ');
 };
 
+// Creates the saves left DOM
 const createSavesLeftText = () => {
   savesLeftDOM = document.createElement('span');
   savesLeftDOM.id = 'savesLeft';
@@ -36,11 +36,9 @@ const createSavesLeftText = () => {
   document.body.appendChild(savesLeftDOM);
 };
 
+// Updates the save left text to contain the number of saves left with the time left for them to reset
 const updateSavesLeftText = (savesLeft, saveTimestamp) => {
-  console.log(1000 * 60 * 60 * 24 - (Date.now() - saveTimestamp));
-  console.log(saveTimestamp);
   const time = millisecondsToTime(1000 * 60 * 60 * 24 - (Date.now() - saveTimestamp));
-  console.log(time);
   savesLeftDOM.innerText = `Saves Left: (${savesLeft}/2)${saveTimestamp ? '\nTime Left: ' + time : ''}`;
 };
 
@@ -48,6 +46,7 @@ const calcSavesLeft = (saves) => {
   return 2 - saves;
 };
 
+// Fetches storage data and updates saves left text
 const setSavesLeft = async (title) => {
   const res = await getStorageData(title);
   const resQuote = res[title];
@@ -58,7 +57,7 @@ const setSavesLeft = async (title) => {
 (async () => {
   createSavesLeftText();
   setInterval(() => {
-    // Find quote title
+    // Updates saves left text when title changes
     const titleDOM = document.querySelector('.textInfoTitle a');
     if (!titleDOM) return title = '';
     if (title !== titleDOM.innerText) {
@@ -76,8 +75,8 @@ const getStorageData = async (title) => {
   });
 };
 
+// Adds another save to storage field for quote
 const updateStorageQuote = async (title, resQuote) => {
-  // Adds another save to storage field for quote
   if (resQuote && resQuote.saves.length >= 2) return resQuote;
 
   const data = resQuote
@@ -110,28 +109,24 @@ const updateStorageQuote = async (title, resQuote) => {
 
 (async () => {
   while (true) {
-    // Find save button
+    // Looks for save button
     clearInterval(btnStillExistsInterval);
 
     const saveBtn = document.querySelector('table[title="Save this score in your account"] td:nth-child(2) a');
     if (saveBtn) {
       await new Promise(async (resolve) => {
-        // Check if save button still exists
+        // Checks if save button still exists
         btnStillExistsInterval = setInterval(() => {
           if (!document.querySelector('table[title="Save this score in your account"] td:nth-child(2) a'))
             return resolve();
         }, 1000);
 
         saveBtn.addEventListener('click', async (e) => {
-          // Get storage data for quote
+          // Gets storage data for quote
           const res = await getStorageData(title);
 
-          console.log(res, 1);
-
           const resQuote = res ? res[title] : undefined;
-          console.log(resQuote, 2);
           const data = await updateStorageQuote(title, resQuote);
-          console.log(data, 4);
 
           await updateSavesLeftText(calcSavesLeft(data[title].saves.length), data[title].saves[0]);
 
